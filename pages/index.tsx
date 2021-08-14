@@ -1,7 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
+
 import { Country } from "../interface/type";
 import styles from "../styles/Home.module.scss";
+import card from "../styles/components/CountryCard.module.scss";
 
 interface Props {
   countries: Country[];
@@ -16,10 +19,46 @@ const Home: NextPage<Props> = ({ countries }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
-        {countries.map((country) => {
-          <p>{country.name}</p>;
-        })}
+      <main className={card.main_container}>
+        <input type="text" placeholder="Search for a country" />
+
+        <select className={card.country_select}>
+          <option disabled selected>
+            Filter by region
+          </option>
+          <option value="Africa">Africa</option>
+          <option value="America">America</option>
+          <option value="Asia">Asia</option>
+          <option value="Europe">Europe</option>
+          <option value="Oceania">Oceania</option>
+        </select>
+
+        <section className={card.card_section}>
+          {countries.map((country, index) => (
+            <article key={index} className={card.card_country}>
+              <img
+                src={country.flag}
+                alt="flag"
+                className={card.country_flag}
+              />
+              <h3>{country.name}</h3>
+              <div className={card.country_info}>
+                <p>
+                  <strong>Population: </strong>
+                  {country.population.toLocaleString("en-US")}
+                </p>
+                <p>
+                  <strong>Region: </strong>
+                  {country.region}
+                </p>
+                <p>
+                  <strong>Capital: </strong>
+                  {country.capital}
+                </p>
+              </div>
+            </article>
+          ))}
+        </section>
       </main>
     </div>
   );
@@ -28,16 +67,18 @@ const Home: NextPage<Props> = ({ countries }) => {
 export const getStaticProps: GetStaticProps = async () => {
   const res = await fetch(`https://restcountries.eu/rest/v2/all`);
   const data = await res.json();
-  
+
   if (!data) {
     return {
       notFound: true,
     };
   }
+
   return {
     props: {
-      countries: { data },
-    }
+      countries: data,
+    },
+    revalidate: 10,
   };
 };
 
